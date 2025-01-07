@@ -1,11 +1,8 @@
 import "./App.css";
+import Login from "./components/Login";
 
 function App() {
-  return (
-    <div className="App">
-      <header class="text-5xl font-bold underline">Learn React</header>
-    </div>
-  );
+  return <Login />;
 }
 
 export default App;
