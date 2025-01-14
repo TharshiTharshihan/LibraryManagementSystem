@@ -1,50 +1,73 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const express = require("express");
+
+const dotenv = require("dotenv");
 
 dotenv.config();
 
 const app = express();
+const cors = require("cors");
 
-// Define a schema and model for books
-const bookSchema = new mongoose.Schema({
-  title: String,
-  author: String,
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const userModel = require("./models/User");
+const db = require("./db");
+app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    credentials: true,
+  })
+);
+
+//signup
+
+app.post("/signup", (req, res) => {
+  const { name, email, password } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
+      userModel
+        .create({ name, email, password: hash })
+        .then((user) => res.json("success"))
+        .catch((err) => res.json(err));
+    })
+    .catch((err) => res.json(err));
 });
 
-const Book = mongoose.model('Book', bookSchema);
+//login
 
-// MongoDB Connection
-const mongoURI = process.env.MONGO_URI;
-mongoose
-  .connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log('MongoDB connected');
-    // Insert a test document
-    return testDatabase();
-  })
-  .catch((err) => console.error('MongoDB connection error:', err));
-
-// Insert a test document
-async function testDatabase() {
-  try {
-    const newBook = new Book({ title: 'Test Book', author: 'Test Author' });
-    await newBook.save();
-    console.log('Test document inserted');
-  } catch (error) {
-    console.error('Error inserting test document:', error);
-  }
-}
-
-// Middleware to parse incoming requests as JSON
-app.use(express.json());
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  userModel
+    .findOne({ email: email })
+    .then((user) => {
+      if (user) {
+        bcrypt.compare(password, user.password, (err, response) => {
+          if (response) {
+            const token = jwt.sign(
+              { email: user.email, role: user.role },
+              "jwt-secret-key",
+              { expiresIn: "1d" }
+            );
+            res.cookie("token", token);
+            return res.json({ status: "success", role: user.role });
+          } else {
+            return res.json("wrong password");
+          }
+        });
+      } else {
+        return res.json("no record");
+      }
+    })
+    .catch((err) => {
+      return res.json("error occurred");
+    });
+});
 
 // Routes
-app.get('/', (req, res) => res.send('API is running'));
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
