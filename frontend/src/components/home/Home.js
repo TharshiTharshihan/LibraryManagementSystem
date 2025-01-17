@@ -23,7 +23,7 @@ const Home = () => {
             </div>
             <div class="md:w-1/2">
               <img
-                src="https://plus.unsplash.com/premium_photo-1675716443562-b771d72a3da7"
+                src="https://imgs.6sqft.com/wp-content/uploads/2016/10/14160508/nypl-book-stacks1.jpg"
                 alt="Coffee beans"
                 class="w-full rounded-lg shadow-lg"
               />
@@ -40,7 +40,7 @@ const Home = () => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1519681393784-d120267933ba"
+                src="https://tse4.mm.bing.net/th?id=OIP.8UodqbF7k-vxiHtjD3KKTAHaE8&pid=Api&P=0&h=220"
                 alt="Coffee"
                 class="w-full h-64 object-cover"
               />
@@ -62,7 +62,7 @@ const Home = () => {
             </div>
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <img
-                src="https://plus.unsplash.com/premium_photo-1675716443562-b771d72a3da7"
+                src="https://tse3.mm.bing.net/th?id=OIP.-q04DNZ-38_SUb3nIFIl-wHaFY&pid=Api&P=0&h=220"
                 alt="Coffee"
                 class="w-full h-64 object-cover"
               />
@@ -84,7 +84,7 @@ const Home = () => {
             </div>
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <img
-                src="https://plus.unsplash.com/premium_photo-1675716443562-b771d72a3da7"
+                src="https://tse2.mm.bing.net/th?id=OIP.4aiWtC5WHFVkEuQStym37wHaFL&pid=Api&P=0&h=220"
                 alt="Coffee"
                 class="w-full h-64 object-cover"
               />
@@ -106,7 +106,7 @@ const Home = () => {
             </div>
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
               <img
-                src="https://plus.unsplash.com/premium_photo-1675716443562-b771d72a3da7"
+                src="https://tse4.mm.bing.net/th?id=OIP.jFBiYTPIj-ttEnvQ-R-1TwHaEw&pid=Api&P=0&h=100"
                 alt="Coffee"
                 class="w-full h-64 object-cover"
               />
