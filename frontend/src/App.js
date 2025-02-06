@@ -6,6 +6,9 @@ import Home from "./components/home/Home";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import Login from "./components/registration/Login";
 import UserDashboard from "./components/user/UserDashboard";
+import AvailableBook from "./components/admin/AvailableBook";
+import AddBook from "./components/admin/AddBook";
+import EditBook from "./components/admin/EditBook";
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/user" element={<UserDashboard />} />
+        <Route path="/books" element={<AvailableBook />} />
+        <Route path="/add" element={<AddBook />} />
+        <Route path="/edit/:id" element={<EditBook />} />
       </Routes>
     </BrowserRouter>
   );
