@@ -1,6 +1,20 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import Swal from "sweetalert2";
+import { useNavigate, Link } from "react-router-dom";
 
 function UserDashboard() {
+  const [books, setBooks] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/books")
+      .then((res) => {
+        setBooks(res.data.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <>
       <div className="bg-orange-100 min-h-screen">
@@ -33,139 +47,38 @@ function UserDashboard() {
           </div>
         </div>
 
-        <div className="flex flex-row pt-24 px-10 pb-4">
-          <div className="w-2/12 mr-6">
-            <div className="bg-white rounded-xl shadow-lg mb-6 px-6 py-4">
-              <a
-                href=""
-                className="inline-block text-gray-600 hover:text-black my-4 w-full"
-              >
-                <span className="material-icons-outlined float-left pr-2">
-                  dashboard
-                </span>
-                Home
-                <span className="material-icons-outlined float-right">
-                  keyboard_arrow_right
-                </span>
-              </a>
-              <a
-                href=""
-                className="inline-block text-gray-600 hover:text-black my-4 w-full"
-              >
-                <span className="material-icons-outlined float-left pr-2">
-                  tune
-                </span>
-                Some menu item
-                <span className="material-icons-outlined float-right">
-                  keyboard_arrow_right
-                </span>
-              </a>
-              <a
-                href=""
-                className="inline-block text-gray-600 hover:text-black my-4 w-full"
-              >
-                <span className="material-icons-outlined float-left pr-2">
-                  file_copy
-                </span>
-                Another menu item
-                <span className="material-icons-outlined float-right">
-                  keyboard_arrow_right
-                </span>
-              </a>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg mb-6 px-6 py-4">
-              <a
-                href=""
-                className="inline-block text-gray-600 hover:text-black my-4 w-full"
-              >
-                <span className="material-icons-outlined float-left pr-2">
-                  face
-                </span>
-                Profile
-                <span className="material-icons-outlined float-right">
-                  keyboard_arrow_right
-                </span>
-              </a>
-              <a
-                href=""
-                className="inline-block text-gray-600 hover:text-black my-4 w-full"
-              >
-                <span className="material-icons-outlined float-left pr-2">
-                  settings
-                </span>
-                Settings
-                <span className="material-icons-outlined float-right">
-                  keyboard_arrow_right
-                </span>
-              </a>
-              <a
-                href=""
-                className="inline-block text-gray-600 hover:text-black my-4 w-full"
-              >
-                <span className="material-icons-outlined float-left pr-2">
-                  power_settings_new
-                </span>
-                Log out
-                <span className="material-icons-outlined float-right">
-                  keyboard_arrow_right
-                </span>
-              </a>
-            </div>
-          </div>
-
-          <div className="w-10/12">
-            <div className="flex flex-row">
+        <section className="py-12 px-4 ">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center justify-center">
+            BOOK DETAILS
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 ">
+            {books.map((book) => (
               <div
-                className="bg-no-repeat bg-red-200 border border-red-300 rounded-xl w-7/12 mr-2 p-6"
-                style={{
-                  backgroundImage:
-                    "url(https://previews.dropbox.com/p/thumb/AAvyFru8elv-S19NMGkQcztLLpDd6Y6VVVMqKhwISfNEpqV59iR5sJaPD4VTrz8ExV7WU9ryYPIUW8Gk2JmEm03OLBE2zAeQ3i7sjFx80O-7skVlsmlm0qRT0n7z9t07jU_E9KafA9l4rz68MsaZPazbDKBdcvEEEQPPc3TmZDsIhes1U-Z0YsH0uc2RSqEb0b83A1GNRo86e-8TbEoNqyX0gxBG-14Tawn0sZWLo5Iv96X-x10kVauME-Mc9HGS5G4h_26P2oHhiZ3SEgj6jW0KlEnsh2H_yTego0grbhdcN1Yjd_rLpyHUt5XhXHJwoqyJ_ylwvZD9-dRLgi_fM_7j/p.png?fv_content=true&size_mode=5)",
-                  backgroundPosition: "90% center",
-                }}
+                className="bg-neutral-100 rounded-lg shadow-md overflow-hidden"
+                key={book._id}
               >
-                <p className="text-5xl text-indigo-900">
-                  Welcome <br />
-                  <strong>Lorem Ipsum</strong>
-                </p>
-                <span className="bg-red-300 text-xl text-white inline-block rounded-full mt-12 px-8 py-2">
-                  <strong>01:51</strong>
-                </span>
-              </div>
+                <img
+                  src={book.image}
+                  alt={book.name}
+                  className="w-full h-64 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                    {book.title}
+                  </h3>
+                  <p className="text-gray-700 text-base">
+                    Our most popular blend, featuring beans from a single farm
+                    in Ethiopia. Notes of chocolate, berries, and citrus.
+                  </p>
 
-              <div
-                className="bg-no-repeat bg-orange-200 border border-orange-300 rounded-xl w-5/12 ml-2 p-6"
-                style={{
-                  backgroundImage:
-                    "url(https://previews.dropbox.com/p/thumb/AAuwpqWfUgs9aC5lRoM_f-yi7OPV4txbpW1makBEj5l21sDbEGYsrC9sb6bwUFXTSsekeka5xb7_IHCdyM4p9XCUaoUjpaTSlKK99S_k4L5PIspjqKkiWoaUYiAeQIdnaUvZJlgAGVUEJoy-1PA9i6Jj0GHQTrF_h9MVEnCyPQ-kg4_p7kZ8Yk0TMTL7XDx4jGJFkz75geOdOklKT3GqY9U9JtxxvRRyo1Un8hOObbWQBS1eYE-MowAI5rNqHCE_e-44yXKY6AKJocLPXz_U4xp87K4mVGehFKC6dgk_i5Ur7gspuD7gRBDvd0sanJ9Ybr_6s2hZhrpad-2WFwWqSNkh/p.png?fv_content=true&size_mode=5)",
-                  backgroundPosition: "100% 40%",
-                }}
-              >
-                <p className="text-5xl text-indigo-900">
-                  Inbox <br />
-                  <strong>23</strong>
-                </p>
-                <a
-                  href=""
-                  className="bg-orange-300 text-xl text-white underline hover:no-underline inline-block rounded-full mt-12 px-8 py-2"
-                >
-                  <strong>See messages</strong>
-                </a>
+                  <button className="mt-4 flex items-center justify-between">
+                    <b className="bi bi-cart-fill"> Borrow </b>
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-row h-64 mt-6">
-              <div className="bg-white rounded-xl shadow-lg px-6 py-4 w-4/12">
-                a
-              </div>
-              <div className="bg-white rounded-xl shadow-lg mx-6 px-6 py-4 w-4/12">
-                b
-              </div>
-              <div className="bg-white rounded-xl shadow-lg px-6 py-4 w-4/12">
-                c
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        </section>
       </div>
     </>
   );

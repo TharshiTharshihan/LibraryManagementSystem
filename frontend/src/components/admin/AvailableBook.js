@@ -52,7 +52,7 @@ function AvailableBook() {
     <>
       <section className="py-12 px-4 ">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center justify-center">
-          Book Details
+          BOOK DETAILS
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 ">
           {books.map((book) => (
@@ -63,7 +63,6 @@ function AvailableBook() {
               <img
                 src={book.image}
                 alt={book.name}
-                alt="Coffee"
                 className="w-full h-64 object-cover"
               />
               <div className="p-6">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-
+import AvailableBook from "./AvailableBook";
+import AddBook from "./AddBook";
 const AdminDashboard = () => {
   // State to track the active section
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -13,85 +14,23 @@ const AdminDashboard = () => {
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-lg font-bold mb-2">Total Users</h3>
-              <p className="text-2xl">1,234</p>
+              <h3 className="text-lg font-bold mb-2">Total Books</h3>
+              <p className="text-2xl">1,200</p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
               <h3 className="text-lg font-bold mb-2">New Orders</h3>
-              <p className="text-2xl">567</p>
+              <p className="text-2xl">500</p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
               <h3 className="text-lg font-bold mb-2">Revenue</h3>
-              <p className="text-2xl">$45,678</p>
+              <p className="text-2xl">$45,000</p>
             </div>
           </div>
         );
       case "Books":
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Users</h2>
-            <p>Here you can manage users.</p>
-          </div>
-        );
+        return <AvailableBook />;
       case "Add Books":
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Settings</h2>
-            <p>Here you can manage settings.</p>
-            <form className="mt-4" onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block font-medium mb-2">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  // value={book.title}
-                  // onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter book title"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block font-medium mb-2">Author</label>
-                <input
-                  type="text"
-                  name="author"
-                  // value={book.author}
-                  // onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter author's name"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block font-medium mb-2">Genre</label>
-                <input
-                  type="text"
-                  name="genre"
-                  // value={book.genre}
-                  // onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter book genre"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block font-medium mb-2">Year</label>
-                <input
-                  type="number"
-                  name="year"
-                  // value={book.year}
-                  // onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter publication year"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Add Book
-              </button>
-            </form>
-          </div>
-        );
+        return <AddBook />;
       default:
         return <p>Select a section from the sidebar.</p>;
     }

@@ -111,6 +111,12 @@ function EditBook() {
           >
             Update Book
           </button>
+          <button
+            onClick={() => navigate("/admin#users")}
+            className="bg-white text-black w-full py-2 rounded"
+          >
+            Back
+          </button>
         </form>
       </div>
     </div>
