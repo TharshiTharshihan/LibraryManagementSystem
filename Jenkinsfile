@@ -2,11 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Check Network Connection') {
-            steps {
-                bat 'ping -n 4 github.com'
-            }
-        }
+      
 
         stage('Checkout Code') {
             steps {
