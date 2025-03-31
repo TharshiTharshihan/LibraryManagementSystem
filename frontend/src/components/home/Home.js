@@ -35,7 +35,7 @@ const Home = () => {
       <section class="py-20">
         <div class="container mx-auto px-4">
           <h2 class="text-3xl font-bold text-gray-800 mb-8">
-            Featured products
+            Featured Products
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
