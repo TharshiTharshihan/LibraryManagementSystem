@@ -8,7 +8,7 @@ const Home = () => {
           <div class="flex flex-col md:flex-row items-center justify-between">
             <div class="md:w-1/2 mb-8 md:mb-0">
               <h1 class="text-white font-bold text-5xl leading-tight mb-6">
-                Discover the world's best Books
+                Discover the World's Best Books
               </h1>
               <p class="text-white text-xl mb-8">
                 From hand-picked farms to your cup, we source the finest beans
