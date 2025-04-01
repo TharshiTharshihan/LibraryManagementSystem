@@ -162,14 +162,27 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh '''
-                    # Check if Docker is installed and available
-                    if ! command -v docker &> /dev/null; then
-                        echo "Docker not found. Please install Docker on the Jenkins server."
+                    echo "Checking for Docker..."
+                    if docker --version > /dev/null 2>&1; then
+                        echo "Docker is installed and working:"
+                        docker --version
+                    else
+                        echo "Docker not found or not working. Please install Docker on the Jenkins server."
                         echo "Run the following commands on the Jenkins server:"
                         echo "sudo apt-get update"
                         echo "sudo apt-get install -y docker.io"
                         echo "sudo systemctl start docker"
                         echo "sudo usermod -aG docker jenkins"
+                        echo "Then restart Jenkins"
+                        exit 1
+                    fi
+                    
+                    # Check if docker can be run without sudo
+                    if docker ps > /dev/null 2>&1; then
+                        echo "Docker is working properly without sudo"
+                    else
+                        echo "Unable to run Docker commands. The jenkins user may not be in the docker group."
+                        echo "Run: sudo usermod -aG docker jenkins"
                         echo "Then restart Jenkins"
                         exit 1
                     fi
@@ -221,9 +234,12 @@ pipeline {
             steps {
                 dir('infrastructure/terraform') {
                     sh '''
-                        # Check if Terraform is installed
-                        if ! command -v terraform &> /dev/null; then
-                            echo "Terraform not found. Please install Terraform on the Jenkins server."
+                        echo "Checking for Terraform..."
+                        if terraform --version > /dev/null 2>&1; then
+                            echo "Terraform is installed and working:"
+                            terraform --version
+                        else
+                            echo "Terraform not found or not working. Please install Terraform on the Jenkins server."
                             echo "Run the following commands on the Jenkins server:"
                             echo "sudo apt-get update"
                             echo "sudo apt-get install -y gnupg software-properties-common curl"
@@ -248,9 +264,12 @@ pipeline {
             steps {
                 dir('infrastructure/ansible') {
                     sh '''
-                        # Check if Ansible is installed
-                        if ! command -v ansible &> /dev/null; then
-                            echo "Ansible not found. Please install Ansible on the Jenkins server."
+                        echo "Checking for Ansible..."
+                        if ansible --version > /dev/null 2>&1; then
+                            echo "Ansible is installed and working:"
+                            ansible --version
+                        else
+                            echo "Ansible not found or not working. Please install Ansible on the Jenkins server."
                             echo "Run the following command on the Jenkins server:"
                             echo "sudo apt-get update"
                             echo "sudo apt-get install -y ansible"
