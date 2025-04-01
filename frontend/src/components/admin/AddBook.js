@@ -13,7 +13,7 @@ function AddBook() {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/books", { title, author, image, year })
+      .post(`${API_URL}/api/books`, { title, author, image, year })
       .then((res) => {
         Swal.fire(
           "Congratulations! You Have Successfully created 😊",
