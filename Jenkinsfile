@@ -19,7 +19,9 @@ pipeline {
         // Set Node.js environment
         NODE_ENV = "development"
         // Make sure PATH includes node and npm
-        PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/bin"
+        PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/bin:${HOME}/.local/bin"
+        // Add NVM directory to path if it exists
+        NVM_DIR = "${HOME}/.nvm"
     }
 
     triggers {
@@ -32,19 +34,32 @@ pipeline {
                 sh '''
                     # Check if Node.js is installed
                     if ! command -v node &> /dev/null; then
-                        echo "Node.js not found, installing Node.js using apt..."
-                        # Install Node.js using apt (simpler and more reliable in CI environments)
-                        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-                        sudo apt-get install -y nodejs
+                        echo "Node.js not found, using NVM to install Node.js..."
                         
-                        # Verify installation
-                        node --version
-                        npm --version
+                        # Install NVM without sudo
+                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+                        
+                        # Set up NVM environment
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+                        
+                        # Install Node.js LTS version
+                        nvm install --lts
+                        nvm use --lts
+                        
+                        # Create symlinks in a local bin directory that's in PATH
+                        mkdir -p $HOME/.local/bin
+                        ln -sf $(which node) $HOME/.local/bin/node
+                        ln -sf $(which npm) $HOME/.local/bin/npm
+                        
+                        echo "Node.js installed via NVM"
                     else
                         echo "Node.js is already installed"
-                        node --version
-                        npm --version
                     fi
+                    
+                    # Display Node.js and npm versions
+                    node --version
+                    npm --version
                 '''
             }
         }
@@ -94,6 +109,10 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh '''
+                        # Load NVM if it exists
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+                        
                         echo "Installing frontend dependencies..."
                         echo "Using Node.js version: $(node --version)"
                         echo "Using npm version: $(npm --version)"
@@ -118,6 +137,10 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
+                        # Load NVM if it exists
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+                        
                         echo "Installing backend dependencies..."
                         echo "Using Node.js version: $(node --version)"
                         echo "Using npm version: $(npm --version)"
@@ -141,12 +164,14 @@ pipeline {
                 sh '''
                     # Check if Docker is installed and available
                     if ! command -v docker &> /dev/null; then
-                        echo "Docker not found, attempting to install..."
-                        sudo apt-get update
-                        sudo apt-get install -y docker.io
-                        sudo systemctl start docker
-                        sudo usermod -aG docker jenkins
-                        # Note: The above command might require a Jenkins restart to take effect
+                        echo "Docker not found. Please install Docker on the Jenkins server."
+                        echo "Run the following commands on the Jenkins server:"
+                        echo "sudo apt-get update"
+                        echo "sudo apt-get install -y docker.io"
+                        echo "sudo systemctl start docker"
+                        echo "sudo usermod -aG docker jenkins"
+                        echo "Then restart Jenkins"
+                        exit 1
                     fi
                     
                     echo "Building Docker images..."
@@ -198,13 +223,15 @@ pipeline {
                     sh '''
                         # Check if Terraform is installed
                         if ! command -v terraform &> /dev/null; then
-                            echo "Terraform not found, attempting to install..."
-                            sudo apt-get update
-                            sudo apt-get install -y gnupg software-properties-common curl
-                            wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-                            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-                            sudo apt-get update
-                            sudo apt-get install -y terraform
+                            echo "Terraform not found. Please install Terraform on the Jenkins server."
+                            echo "Run the following commands on the Jenkins server:"
+                            echo "sudo apt-get update"
+                            echo "sudo apt-get install -y gnupg software-properties-common curl"
+                            echo "wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
+                            echo "echo \"deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main\" | sudo tee /etc/apt/sources.list.d/hashicorp.list"
+                            echo "sudo apt-get update"
+                            echo "sudo apt-get install -y terraform"
+                            exit 1
                         fi
                         
                         export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -223,9 +250,11 @@ pipeline {
                     sh '''
                         # Check if Ansible is installed
                         if ! command -v ansible &> /dev/null; then
-                            echo "Ansible not found, attempting to install..."
-                            sudo apt-get update
-                            sudo apt-get install -y ansible
+                            echo "Ansible not found. Please install Ansible on the Jenkins server."
+                            echo "Run the following command on the Jenkins server:"
+                            echo "sudo apt-get update"
+                            echo "sudo apt-get install -y ansible"
+                            exit 1
                         fi
                         
                         export ANSIBLE_HOST_KEY_CHECKING="False"
