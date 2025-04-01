@@ -23,7 +23,7 @@ function EditBook() {
 
   useEffect(() => {
     axios
-      .get(`http://3.235.153.43/api/books/${id}`)
+      .get(`http://localhost:5000/api/books/${id}`)
       .then((res) => {
         const { title, author, year, image } = res.data.data;
         setBook({
@@ -42,7 +42,7 @@ function EditBook() {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`http://3.235.153.43/api/books/${id}`, { ...book })
+      .put(`http://localhost:5000/api/books/${id}`, { ...book })
       .then((res) => {
         Swal.fire("Updated!", "Your product has been updated.", "success");
         navigate("/books");

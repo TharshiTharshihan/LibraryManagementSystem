@@ -10,7 +10,7 @@ function AvailableBook() {
 
   useEffect(() => {
     axios
-      .get("http://3.235.153.43/api/books")
+      .get("http://localhost:5000/api/books")
       .then((res) => {
         setBooks(res.data.data);
       })
@@ -33,7 +33,7 @@ function AvailableBook() {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`http://3.235.153.43/api/books/${id}`)
+          .delete(`http://localhost:5000/api/books/${id}`)
           .then(() => {
             setBooks(books.filter((book) => book._id !== id));
             Swal.fire("Deleted!", "Your book has been deleted.", "success");

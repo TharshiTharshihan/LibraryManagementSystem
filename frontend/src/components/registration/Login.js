@@ -11,7 +11,7 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://3.235.153.43/login", { email, password })
+      .post("http://localhost:5000/login", { email, password })
       .then((res) => {
         if (res.data.status === "success") {
           if (res.data.role === "admin") {
