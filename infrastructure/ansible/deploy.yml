@@ -76,9 +76,7 @@
     - name: Login to Docker Hub
       become: yes
       become_user: ubuntu
-      docker_login:
-        username: "{{ docker_username }}"
-        password: "{{ docker_password }}"
+      shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
       no_log: true
 
     - name: Pull Docker images
