@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS' // This uses a NodeJS installation configured in Jenkins
-    }
-
     environment {
         DOCKER_HUB_CREDS = credentials('docker')
         AWS_CREDS = credentials('aws-credentials')
@@ -31,6 +27,28 @@ pipeline {
     }
 
     stages {
+        stage('Install Node.js') {
+            steps {
+                sh '''
+                    # Check if Node.js is installed
+                    if ! command -v node &> /dev/null; then
+                        echo "Node.js not found, installing Node.js using apt..."
+                        # Install Node.js using apt (simpler and more reliable in CI environments)
+                        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                        sudo apt-get install -y nodejs
+                        
+                        # Verify installation
+                        node --version
+                        npm --version
+                    else
+                        echo "Node.js is already installed"
+                        node --version
+                        npm --version
+                    fi
+                '''
+            }
+        }
+
         stage('Check Environment') {
             steps {
                 sh 'echo "PATH: $PATH"'
@@ -77,7 +95,10 @@ pipeline {
                 dir('frontend') {
                     sh '''
                         echo "Installing frontend dependencies..."
-                        echo "Installing react-scripts globally first..."
+                        echo "Using Node.js version: $(node --version)"
+                        echo "Using npm version: $(npm --version)"
+                        
+                        echo "Installing react-scripts globally..."
                         npm install -g react-scripts
                         
                         echo "Now installing project dependencies..."
@@ -98,6 +119,9 @@ pipeline {
                 dir('backend') {
                     sh '''
                         echo "Installing backend dependencies..."
+                        echo "Using Node.js version: $(node --version)"
+                        echo "Using npm version: $(npm --version)"
+                        
                         npm cache clean --force
                         npm install --legacy-peer-deps --no-fund --no-audit --progress=false --prefer-online
                     '''
@@ -114,8 +138,21 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                sh 'docker build -t $DOCKER_USERNAME/library-frontend:latest ./frontend'
-                sh 'docker build -t $DOCKER_USERNAME/library-backend:latest ./backend'
+                sh '''
+                    # Check if Docker is installed and available
+                    if ! command -v docker &> /dev/null; then
+                        echo "Docker not found, attempting to install..."
+                        sudo apt-get update
+                        sudo apt-get install -y docker.io
+                        sudo systemctl start docker
+                        sudo usermod -aG docker jenkins
+                        # Note: The above command might require a Jenkins restart to take effect
+                    fi
+                    
+                    echo "Building Docker images..."
+                    docker build -t $DOCKER_USERNAME/library-frontend:latest ./frontend
+                    docker build -t $DOCKER_USERNAME/library-backend:latest ./backend
+                '''
                 echo 'Docker images built successfully'
             }
         }
@@ -158,12 +195,22 @@ pipeline {
         stage('Provision Infrastructure with Terraform') {
             steps {
                 dir('infrastructure/terraform') {
-                    // Using sh for Terraform commands
                     sh '''
-                    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                    terraform init
-                    terraform apply -auto-approve
+                        # Check if Terraform is installed
+                        if ! command -v terraform &> /dev/null; then
+                            echo "Terraform not found, attempting to install..."
+                            sudo apt-get update
+                            sudo apt-get install -y gnupg software-properties-common curl
+                            wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+                            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+                            sudo apt-get update
+                            sudo apt-get install -y terraform
+                        fi
+                        
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                        terraform init
+                        terraform apply -auto-approve
                     '''
                     echo "Infrastructure provisioned successfully"
                 }
@@ -173,10 +220,16 @@ pipeline {
         stage('Configure Server with Ansible') {
             steps {
                 dir('infrastructure/ansible') {
-                    // Using sh for Ansible commands
                     sh '''
-                    export ANSIBLE_HOST_KEY_CHECKING="False"
-                    ansible-playbook -i inventory.ini deploy.yml -e "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
+                        # Check if Ansible is installed
+                        if ! command -v ansible &> /dev/null; then
+                            echo "Ansible not found, attempting to install..."
+                            sudo apt-get update
+                            sudo apt-get install -y ansible
+                        fi
+                        
+                        export ANSIBLE_HOST_KEY_CHECKING="False"
+                        ansible-playbook -i inventory.ini deploy.yml -e "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
                     '''
                     echo 'Server configured successfully'
                 }
