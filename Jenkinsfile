@@ -37,17 +37,17 @@ pipeline {
 
         stage('Pre-build Cleanup') {
             steps {
-                // Use cmd with /c to ensure proper execution (more reliable than PowerShell for this case)
-                bat '''
-                    echo Cleaning frontend node_modules...
-                    rmdir /s /q frontend\\node_modules 2>nul || echo No frontend/node_modules to delete
+                // Use sh commands for Linux/Ubuntu
+                sh '''
+                    echo "Cleaning frontend node_modules..."
+                    rm -rf frontend/node_modules || echo "No frontend/node_modules to delete"
                     
-                    echo Cleaning backend node_modules...
-                    rmdir /s /q backend\\node_modules 2>nul || echo No backend/node_modules to delete
+                    echo "Cleaning backend node_modules..."
+                    rm -rf backend/node_modules || echo "No backend/node_modules to delete"
                     
-                    echo Creating fresh npm cache directory...
-                    rmdir /s /q npm-cache 2>nul || echo No npm-cache to delete
-                    mkdir npm-cache
+                    echo "Creating fresh npm cache directory..."
+                    rm -rf npm-cache || echo "No npm-cache to delete"
+                    mkdir -p npm-cache
                 '''
                 echo 'Pre-build cleanup completed'
             }
@@ -56,17 +56,17 @@ pipeline {
         stage('Install and Build Frontend') {
             steps {
                 dir('frontend') {
-                    bat '''
-                        echo Installing frontend dependencies...
-                        echo Installing react-scripts globally first...
+                    sh '''
+                        echo "Installing frontend dependencies..."
+                        echo "Installing react-scripts globally first..."
                         npm install -g react-scripts
                         
-                        echo Now installing project dependencies...
+                        echo "Now installing project dependencies..."
                         npm cache clean --force
                         npm install --legacy-peer-deps --no-fund --no-audit --progress=false --prefer-online
                         
-                        echo Building frontend...
-                        set CI=false
+                        echo "Building frontend..."
+                        export CI=false
                         npm run build || echo "Build failed but continuing"
                     '''
                     echo 'Frontend build completed'
@@ -77,8 +77,8 @@ pipeline {
         stage('Install Backend Dependencies') {
             steps {
                 dir('backend') {
-                    bat '''
-                        echo Installing backend dependencies...
+                    sh '''
+                        echo "Installing backend dependencies..."
                         npm cache clean --force
                         npm install --legacy-peer-deps --no-fund --no-audit --progress=false --prefer-online
                     '''
@@ -95,8 +95,8 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                bat 'docker build -t %DOCKER_USERNAME%/library-frontend:latest ./frontend'
-                bat 'docker build -t %DOCKER_USERNAME%/library-backend:latest ./backend'
+                sh 'docker build -t $DOCKER_USERNAME/library-frontend:latest ./frontend'
+                sh 'docker build -t $DOCKER_USERNAME/library-backend:latest ./backend'
                 echo 'Docker images built successfully'
             }
         }
@@ -109,15 +109,15 @@ pipeline {
                 
                 // Test Docker login separately before pushing
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat '''
-                        echo Testing Docker login...
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        IF %ERRORLEVEL% NEQ 0 (
-                            echo Docker login failed! Check credentials in Jenkins.
-                            exit /b 1
-                        ) ELSE (
-                            echo Docker login successful!
-                        )
+                    sh '''
+                        echo "Testing Docker login..."
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        if [ $? -ne 0 ]; then
+                            echo "Docker login failed! Check credentials in Jenkins."
+                            exit 1
+                        else
+                            echo "Docker login successful!"
+                        fi
                     '''
                 }
             }
@@ -126,10 +126,10 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat '''
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        docker push %DOCKER_USERNAME%/library-frontend:latest
-                        docker push %DOCKER_USERNAME%/library-backend:latest
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push $DOCKER_USERNAME/library-frontend:latest
+                        docker push $DOCKER_USERNAME/library-backend:latest
                     '''
                 }
                 echo 'Docker images pushed to Docker Hub'
@@ -139,10 +139,10 @@ pipeline {
         stage('Provision Infrastructure with Terraform') {
             steps {
                 dir('infrastructure/terraform') {
-                    // Using PowerShell for Terraform commands
-                    powershell '''
-                    $env:AWS_ACCESS_KEY_ID = $env:AWS_ACCESS_KEY_ID
-                    $env:AWS_SECRET_ACCESS_KEY = $env:AWS_SECRET_ACCESS_KEY
+                    // Using sh for Terraform commands
+                    sh '''
+                    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                     terraform init
                     terraform apply -auto-approve
                     '''
@@ -154,10 +154,10 @@ pipeline {
         stage('Configure Server with Ansible') {
             steps {
                 dir('infrastructure/ansible') {
-                    // Using PowerShell for Ansible commands
-                    powershell '''
-                    $env:ANSIBLE_HOST_KEY_CHECKING = "False"
-                    ansible-playbook -i inventory.ini deploy.yml -e "docker_username=$env:DOCKER_USERNAME docker_password=$env:DOCKER_PASSWORD"
+                    // Using sh for Ansible commands
+                    sh '''
+                    export ANSIBLE_HOST_KEY_CHECKING="False"
+                    ansible-playbook -i inventory.ini deploy.yml -e "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
                     '''
                     echo 'Server configured successfully'
                 }
@@ -175,7 +175,7 @@ pipeline {
         always {
             echo 'Cleaning up workspace (except node_modules)...'
             // Remove npm cache but keep the rest of the workspace
-            bat 'rmdir /s /q npm-cache 2>nul || echo No npm-cache to delete'
+            sh 'rm -rf npm-cache || echo "No npm-cache to delete"'
         }
     }
 }
