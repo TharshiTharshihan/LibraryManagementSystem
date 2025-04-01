@@ -254,6 +254,26 @@ pipeline {
                         export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                         terraform init
                         terraform apply -auto-approve
+                        
+                        # Wait for EC2 instance to initialize
+                        echo "Waiting 60 seconds for EC2 instance to initialize..."
+                        sleep 60
+                        
+                        # Get the EC2 instance IP and update Ansible inventory
+                        EC2_IP=$(terraform output -raw instance_public_ip)
+                        echo "EC2 Instance Public IP: $EC2_IP"
+                        
+                        # Create Ansible inventory file
+                        echo "[webservers]
+$EC2_IP
+
+[all:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=../terraform/library-key
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ConnectionAttempts=10'" > ../ansible/inventory.ini
+                        
+                        echo "Updated Ansible inventory with EC2 IP: $EC2_IP"
+                        cat ../ansible/inventory.ini
                     '''
                     echo "Infrastructure provisioned successfully"
                 }
