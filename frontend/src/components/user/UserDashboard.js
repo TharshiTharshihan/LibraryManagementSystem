@@ -3,12 +3,13 @@ import React, { useEffect, useState } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Swal from "sweetalert2";
 import { useNavigate, Link } from "react-router-dom";
+import API_URL from "../../config";
 
 function UserDashboard() {
   const [books, setBooks] = useState([]);
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/books")
+      .get(`${API_URL}/api/books`)
       .then((res) => {
         setBooks(res.data.data);
       })

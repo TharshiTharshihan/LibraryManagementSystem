@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
+import API_URL from "../../config";
 
 const Login = () => {
   const [email, setemail] = useState("");
@@ -11,7 +12,7 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/login", { email, password })
+      .post(`${API_URL}/login`, { email, password })
       .then((res) => {
         if (res.data.status === "success") {
           if (res.data.role === "admin") {

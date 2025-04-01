@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import API_URL from "../../config";
 
 const Signup = () => {
   const [name, setname] = useState("");
@@ -12,7 +13,7 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/signup", { name, email, password })
+      .post(`${API_URL}/signup`, { name, email, password })
       .then((res) => {
         Swal.fire(
           "Congratulations! You Have Successfully Registered with Us 😊",

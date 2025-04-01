@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
+import API_URL from "../../config";
 
 function EditBook() {
   const [book, setBook] = useState({
@@ -23,7 +24,7 @@ function EditBook() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/books/${id}`)
+      .get(`${API_URL}/api/books/${id}`)
       .then((res) => {
         const { title, author, year, image } = res.data.data;
         setBook({
@@ -42,7 +43,7 @@ function EditBook() {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:5000/api/books/${id}`, { ...book })
+      .put(`${API_URL}/api/books/${id}`, { ...book })
       .then((res) => {
         Swal.fire("Updated!", "Your product has been updated.", "success");
         navigate("/books");

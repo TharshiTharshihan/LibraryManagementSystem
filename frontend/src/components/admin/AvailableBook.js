@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Swal from "sweetalert2";
 import { useNavigate, Link } from "react-router-dom";
+import API_URL from "../../config";
 
 function AvailableBook() {
   const [books, setBooks] = useState([]);
@@ -10,7 +11,7 @@ function AvailableBook() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/books")
+      .get(`${API_URL}/api/books`)
       .then((res) => {
         setBooks(res.data.data);
       })
@@ -33,7 +34,7 @@ function AvailableBook() {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`http://localhost:5000/api/books/${id}`)
+          .delete(`${API_URL}/api/books/${id}`)
           .then(() => {
             setBooks(books.filter((book) => book._id !== id));
             Swal.fire("Deleted!", "Your book has been deleted.", "success");
