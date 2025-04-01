@@ -110,11 +110,17 @@ resource "aws_security_group" "library_sg" {
   }
 }
 
+# Create a key pair for EC2 instances
+resource "aws_key_pair" "library_key_pair" {
+  key_name   = var.key_name
+  public_key = file("${path.module}/library-key.pub")
+}
+
 # Create an EC2 instance
 resource "aws_instance" "library_instance" {
   ami                    = var.aws_ami_id
   instance_type          = var.instance_type
-  key_name               = var.key_name
+  key_name               = aws_key_pair.library_key_pair.key_name
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.library_sg.id]
 
