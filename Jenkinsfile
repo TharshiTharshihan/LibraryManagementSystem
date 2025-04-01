@@ -101,11 +101,37 @@ pipeline {
             }
         }
 
+        stage('Verify Docker Credentials') {
+            steps {
+                // Print masked credentials info for debugging (safe, doesn't reveal actual credentials)
+                echo "Docker username: ${DOCKER_USERNAME}"
+                echo "Docker password length: ${DOCKER_PASSWORD.length()}"
+                
+                // Test Docker login separately before pushing
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat '''
+                        echo Testing Docker login...
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        IF %ERRORLEVEL% NEQ 0 (
+                            echo Docker login failed! Check credentials in Jenkins.
+                            exit /b 1
+                        ) ELSE (
+                            echo Docker login successful!
+                        )
+                    '''
+                }
+            }
+        }
+
         stage('Push Docker Images') {
             steps {
-                bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
-                bat 'docker push %DOCKER_USERNAME%/library-frontend:latest'
-                bat 'docker push %DOCKER_USERNAME%/library-backend:latest'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat '''
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        docker push %DOCKER_USERNAME%/library-frontend:latest
+                        docker push %DOCKER_USERNAME%/library-backend:latest
+                    '''
+                }
                 echo 'Docker images pushed to Docker Hub'
             }
         }
