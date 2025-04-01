@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS' // This uses a NodeJS installation configured in Jenkins
+    }
+
     environment {
         DOCKER_HUB_CREDS = credentials('docker')
         AWS_CREDS = credentials('aws-credentials')
@@ -18,6 +22,8 @@ pipeline {
         CI = "false"
         // Set Node.js environment
         NODE_ENV = "development"
+        // Make sure PATH includes node and npm
+        PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/bin"
     }
 
     triggers {
@@ -25,6 +31,19 @@ pipeline {
     }
 
     stages {
+        stage('Check Environment') {
+            steps {
+                sh 'echo "PATH: $PATH"'
+                sh 'which node || echo "Node not found in PATH"'
+                sh 'which npm || echo "NPM not found in PATH"'
+                sh 'node --version || echo "Node not installed or available"'
+                sh 'npm --version || echo "NPM not installed or available"'
+                sh 'docker --version || echo "Docker not installed"'
+                sh 'terraform --version || echo "Terraform not installed"'
+                sh 'ansible --version || echo "Ansible not installed"'
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 checkout scmGit(
