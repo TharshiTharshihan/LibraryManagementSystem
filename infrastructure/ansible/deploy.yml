@@ -1,0 +1,108 @@
+---
+- name: Deploy Library Book Management Application
+  hosts: webservers
+  become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - software-properties-common
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker packages
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Create docker-compose directory
+      file:
+        path: /home/ubuntu/library-app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy production docker-compose file
+      copy:
+        src: ../../docker-compose.prod.yml
+        dest: /home/ubuntu/library-app/docker-compose.yml
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+      
+    - name: Create .env file with Docker credentials
+      copy:
+        content: |
+          DOCKER_USERNAME={{ docker_username }}
+        dest: /home/ubuntu/library-app/.env
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+
+    - name: Login to Docker Hub
+      become: yes
+      become_user: ubuntu
+      docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+      no_log: true
+
+    - name: Pull Docker images
+      become: yes
+      become_user: ubuntu
+      command: docker pull {{ item }}
+      loop:
+        - "{{ docker_username }}/library-backend:latest"
+        - "{{ docker_username }}/library-frontend:latest"
+
+    - name: Deploy Library Management System using docker-compose
+      become: yes
+      become_user: ubuntu
+      shell: |
+        cd /home/ubuntu/library-app
+        docker compose down
+        docker compose up -d
+      environment:
+        DOCKER_USERNAME: "{{ docker_username }}"
+
+    - name: Wait for application to start
+      pause:
+        seconds: 10
+        
+    - name: Print application URL
+      debug:
+        msg: "Application is now available at http://{{ ansible_host }}"

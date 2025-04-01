@@ -1,0 +1,4 @@
+---
+# Docker Hub credentials
+docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
+docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
