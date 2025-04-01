@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDS = credentials('dockerhub-credentials')
+        DOCKER_HUB_CREDS = credentials('docker')
         AWS_CREDS = credentials('aws-credentials')
         DOCKER_USERNAME = "${DOCKER_HUB_CREDS_USR}"
         DOCKER_PASSWORD = "${DOCKER_HUB_CREDS_PSW}"
@@ -108,7 +108,7 @@ pipeline {
                 echo "Docker password length: ${DOCKER_PASSWORD.length()}"
                 
                 // Test Docker login separately before pushing
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat '''
                         echo Testing Docker login...
                         echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
@@ -125,7 +125,7 @@ pipeline {
 
         stage('Push Docker Images') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat '''
                         echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                         docker push %DOCKER_USERNAME%/library-frontend:latest
