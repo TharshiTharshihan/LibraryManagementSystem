@@ -8,7 +8,7 @@ function UserDashboard() {
   const [books, setBooks] = useState([]);
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/books")
+      .get("http://3.235.153.43/api/books")
       .then((res) => {
         setBooks(res.data.data);
       })

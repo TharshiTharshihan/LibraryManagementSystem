@@ -68,6 +68,7 @@
       copy:
         content: |
           DOCKER_USERNAME={{ docker_username }}
+          SERVER_IP={{ ansible_host }}
         dest: /home/ubuntu/library-app/.env
         owner: ubuntu
         group: ubuntu
