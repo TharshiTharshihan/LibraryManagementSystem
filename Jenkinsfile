@@ -250,10 +250,20 @@ pipeline {
                             exit 1
                         fi
                         
+                        # Fix permissions on SSH private key if it exists
+                        if [ -f "library-key" ]; then
+                            echo "Setting correct permissions (0600) on SSH private key..."
+                            chmod 600 library-key
+                        fi
+                        
                         export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
                         export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                         terraform init
                         terraform apply -auto-approve
+                        
+                        # Ensure SSH key has proper permissions
+                        echo "Setting correct permissions (0600) on SSH private key..."
+                        chmod 600 library-key
                         
                         # Wait for EC2 instance to initialize
                         echo "Waiting 60 seconds for EC2 instance to initialize..."
@@ -296,8 +306,17 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ConnectionAttempts=10'" 
                             exit 1
                         fi
                         
+                        # Fix SSH key permissions one more time to be absolutely sure
+                        echo "Setting correct permissions (0600) on SSH private key..."
+                        chmod 600 ../terraform/library-key
+                        ls -la ../terraform/library-key
+                        
+                        # Wait a bit longer for SSH to be ready
+                        echo "Waiting 30 seconds more for SSH to be ready..."
+                        sleep 30
+                        
                         export ANSIBLE_HOST_KEY_CHECKING="False"
-                        ansible-playbook -i inventory.ini deploy.yml -e "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
+                        ansible-playbook -i inventory.ini deploy.yml -e "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD" -vvv
                     '''
                     echo 'Server configured successfully'
                 }
