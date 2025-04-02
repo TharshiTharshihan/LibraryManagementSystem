@@ -5,6 +5,14 @@
   vars_files:
     - vars.yml
 
+  pre_tasks:
+    - name: Set correct permissions on SSH key
+      delegate_to: localhost
+      become: no
+      file:
+        path: ../terraform/library-key
+        mode: '0600'
+      
   tasks:
     - name: Update apt cache
       apt:
