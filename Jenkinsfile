@@ -271,16 +271,19 @@ pipeline {
                         
                         # Get the EC2 instance IP and update Ansible inventory
                         EC2_IP=$(terraform output -raw instance_public_ip)
-                        echo "EC2 Instance Public IP: $EC2_IP"
+                        echo "******************************************"
+                        echo "** EC2 INSTANCE PUBLIC IP: $EC2_IP **"
+                        echo "** APPLICATION URL: http://$EC2_IP **"
+                        echo "******************************************"
                         
                         # Create Ansible inventory file
                         echo "[webservers]
-$EC2_IP
+$EC2_IP ansible_user=ubuntu ansible_ssh_private_key_file=../terraform/library-key
 
 [all:vars]
 ansible_user=ubuntu
 ansible_ssh_private_key_file=../terraform/library-key
-ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ConnectionAttempts=10'" > ../ansible/inventory.ini
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ConnectionAttempts=60 -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=60'" > ../ansible/inventory.ini
                         
                         echo "Updated Ansible inventory with EC2 IP: $EC2_IP"
                         cat ../ansible/inventory.ini

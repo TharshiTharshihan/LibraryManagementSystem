@@ -16,7 +16,7 @@ const db = require("./db");
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://3.235.153.43", "http://3.235.153.43:3000"],
+    origin: ["http://localhost:3000", "http://3.91.45.203", "http://3.91.45.203:3000"],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     credentials: true,
   })
